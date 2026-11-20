@@ -23,7 +23,7 @@ export const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
-  const { items, count, total, clearCart, updateQuantity } = useCart();
+  const { items, count, total, clearCart, updateQuantity, removeItem } = useCart();
   const location = useLocation();
 
   const navLinks = [
@@ -190,26 +190,51 @@ export const Layout = ({ children }) => {
               <>
                 {items.map((item) => (
                   <div
-                    key={item.id}
+                    key={item.cartKey || item.id}
                     className="flex items-center justify-between gap-3 bg-gray-50 p-3 rounded-xl"
                   >
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900">{item.name}</h4>
-                      <p className="text-xs text-gray-500">R$ {item.price.toFixed(2)} cada</p>
+                      {item.selectedOptions &&
+                        item.selectedOptions.length > 0 && (
+                          <p className="text-xs text-primary-600">
+                            {item.selectedOptions
+                              .map(
+                                (o) =>
+                                  `${o.categoryName}: ${o.valueName} (+R$ ${Number(
+                                    o.priceExtra || 0
+                                  ).toFixed(2)})`
+                              )
+                              .join(' | ')}
+                          </p>
+                        )}
+                      <p className="text-xs text-gray-500">
+                        R$ {item.unitPrice.toFixed(2)} cada
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() =>
+                          updateQuantity(item.cartKey || item.id, item.quantity - 1)
+                        }
                         className="w-7 h-7 rounded-full bg-gray-200 text-gray-700 text-xs flex items-center justify-center hover:bg-gray-300"
                       >
                         -
                       </button>
                       <span className="w-4 text-center font-medium">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() =>
+                          updateQuantity(item.cartKey || item.id, item.quantity + 1)
+                        }
                         className="w-7 h-7 rounded-full bg-gray-200 text-gray-700 text-xs flex items-center justify-center hover:bg-gray-300"
                       >
                         +
+                      </button>
+                      <button
+                        onClick={() => removeItem(item.cartKey || item.id)}
+                        className="w-7 h-7 rounded-full bg-gray-200 text-red-600 text-xs flex items-center justify-center hover:bg-red-100"
+                      >
+                        <X className="w-3 h-3" />
                       </button>
                     </div>
                   </div>

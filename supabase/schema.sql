@@ -102,6 +102,7 @@ create table if not exists order_items (
   product_id uuid references products(id) on delete set null,
   quantity integer not null default 1 check (quantity > 0),
   unit_price numeric(10,2) not null check (unit_price >= 0),
+  product_options jsonb not null default '[]'::jsonb,
   observations text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -319,6 +320,60 @@ begin
     ', t, t);
   end loop;
 end $$;
+
+-- ============================================
+-- Tabela: product_option_categories (ex: Sabor, Tamanho)
+-- ============================================
+create table if not exists product_option_categories (
+  id uuid default uuid_generate_v4() primary key,
+  product_id uuid references products(id) on delete cascade,
+  name text not null, -- ex: "Sabor", "Tamanho", "Adicional"
+  sort_order integer default 0,
+  is_required boolean default false,
+  allow_multiple boolean default false,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- ============================================
+-- Tabela: product_option_values (ex: Bolonhesa, P, M, G com preço extra)
+-- ============================================
+create table if not exists product_option_values (
+  id uuid default uuid_generate_v4() primary key,
+  option_category_id uuid references product_option_categories(id) on delete cascade,
+  name text not null, -- ex: "Bolonhesa", "P", "M", "G"
+  price_extra numeric(10,2) not null default 0, -- preço adicional sobre o preço base
+  sort_order integer default 0,
+  is_default boolean default false,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Índices
+create index if not exists idx_product_option_categories_product_id on product_option_categories(product_id);
+create index if not exists idx_product_option_values_category_id on product_option_values(option_category_id);
+
+-- RLS
+alter table product_option_categories enable row level security;
+alter table product_option_values enable row level security;
+
+create policy "Product option categories are viewable by everyone" on product_option_categories for select using (true);
+create policy "Product option categories are manageable by admins" on product_option_categories for all using (auth.jwt() ->> 'role' = 'admin') with check (auth.jwt() ->> 'role' = 'admin');
+
+create policy "Product option values are viewable by everyone" on product_option_values for select using (true);
+create policy "Product option values are manageable by admins" on product_option_values for all using (auth.jwt() ->> 'role' = 'admin') with check (auth.jwt() ->> 'role' = 'admin');
+
+-- Triggers updated_at
+drop trigger if exists update_product_option_categories_updated_at on product_option_categories;
+drop trigger if exists update_product_option_values_updated_at on product_option_values;
+create trigger update_product_option_categories_updated_at
+  before update on product_option_categories
+  for each row
+  execute function update_updated_at_column();
+create trigger update_product_option_values_updated_at
+  before update on product_option_values
+  for each row
+  execute function update_updated_at_column();
 
 -- ============================================
 -- Fim do script

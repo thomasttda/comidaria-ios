@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { Layout } from './components/layout/Layout';
 import { Home } from './pages/Home';
+import { ProductDetail } from './pages/ProductDetail';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminLogin } from './pages/AdminLogin';
 
@@ -22,6 +23,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Layout><Home /></Layout>} />
+            <Route path="/produto/:id" element={<Layout><ProductDetail /></Layout>} />
             <Route path="/login" element={<AdminLogin />} />
             <Route
               path="/admin"

@@ -15,11 +15,13 @@ import {
   Settings,
   CheckCircle,
   AlertCircle,
+  Sliders,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
 import { useOrders } from '../hooks/useOrders';
 import { useFinance } from '../hooks/useFinance';
+import { useProductOptions } from '../hooks/useProductOptions';
 
 export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -305,12 +307,109 @@ const ProductsManagement = () => {
           <button onClick={() => { setEditingId(null); setOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-sm hover:shadow-md"><Plus className="w-4 h-4" /> Novo Produto</button>
         </div>
       </div>
-      {open && <ProductForm open={open} onClose={() => setOpen(false)} onSave={handleSave} form={form} setForm={setForm} editing={!!editingId} title={editingId ? 'Editar Produto' : 'Novo Produto'} />}
+      {open && <ProductForm open={open} onClose={() => setOpen(false)} onSave={handleSave} form={form} setForm={setForm} editing={!!editingId} editingId={editingId} title={editingId ? 'Editar Produto' : 'Novo Produto'} />}
     </div>
   );
 };
 
-const ProductForm = ({ open, onClose, onSave, form, setForm, editing, title }) => {
+const ProductForm = ({ open, onClose, onSave, form, setForm, editing, editingId, title }) => {
+  const {
+    optionCategories,
+    loading: optionsLoading,
+    createOptionCategory,
+    updateOptionCategory,
+    deleteOptionCategory,
+    createOptionValue,
+    updateOptionValue,
+    deleteOptionValue,
+  } = useProductOptions(editingId || null);
+
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatRequired, setNewCatRequired] = useState(false);
+  const [newCatMultiple, setNewCatMultiple] = useState(false);
+
+  const [editingCatId, setEditingCatId] = useState(null);
+  const [editCatName, setEditCatName] = useState('');
+
+  const [newValueDrafts, setNewValueDrafts] = useState({});
+  const [editingValueId, setEditingValueId] = useState(null);
+  const [editValueName, setEditValueName] = useState('');
+  const [editValuePrice, setEditValuePrice] = useState('');
+
+  const handleAddCategory = async () => {
+    if (!newCatName.trim()) return;
+    await createOptionCategory(newCatName.trim(), newCatRequired, newCatMultiple);
+    setNewCatName('');
+    setNewCatRequired(false);
+    setNewCatMultiple(false);
+  };
+
+  const handleSaveCategory = async (cat) => {
+    if (!editCatName.trim()) return;
+    await updateOptionCategory(cat.id, { name: editCatName.trim() });
+    setEditingCatId(null);
+    setEditCatName('');
+  };
+
+  const handleDeleteCategory = async (id) => {
+    if (!confirm('Excluir esta categoria de opções e todos os seus valores?')) return;
+    await deleteOptionCategory(id);
+  };
+
+  const handleAddValueDraft = (catId) => {
+    setNewValueDrafts((prev) => ({ ...prev, [catId]: { name: '', priceExtra: '' } }));
+  };
+
+  const handleCancelValueDraft = (catId) => {
+    setNewValueDrafts((prev) => {
+      const next = { ...prev };
+      delete next[catId];
+      return next;
+    });
+  };
+
+  const handleSaveValue = async (catId, draft = null) => {
+    const d = draft || newValueDrafts[catId];
+    if (!d || !d.name.trim()) return;
+    await createOptionValue(catId, d.name.trim(), Number(d.priceExtra || 0), false);
+    setNewValueDrafts((prev) => {
+      const next = { ...prev };
+      delete next[catId];
+      return next;
+    });
+  };
+
+  const handleStartValueEdit = (v) => {
+    setEditingValueId(v.id);
+    setEditValueName(v.name);
+    setEditValuePrice((v.price_extra || 0).toString());
+  };
+
+  const handleSaveValueEdit = async (v) => {
+    await updateOptionValue(v.id, {
+      name: editValueName.trim(),
+      price_extra: Number(editValuePrice || 0),
+    });
+    setEditingValueId(null);
+    setEditValueName('');
+    setEditValuePrice('');
+  };
+
+  const handleDeleteValue = async (id) => {
+    await deleteOptionValue(id);
+    if (editingValueId === id) {
+      setEditingValueId(null);
+      setEditValueName('');
+      setEditValuePrice('');
+    }
+  };
+
+  const optionExtra = (catId, valueId) => {
+    const cat = optionCategories.find((c) => c.id === catId);
+    const v = cat?.product_option_values?.find((x) => x.id === valueId);
+    return v ? Number(v.price_extra || 0) : 0;
+  };
+
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
@@ -329,7 +428,7 @@ const ProductForm = ({ open, onClose, onSave, form, setForm, editing, title }) =
             <textarea className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Preço (R$)</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Preço base (R$)</label>
             <input type="number" step="0.01" className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
           </div>
           <div>
@@ -344,6 +443,207 @@ const ProductForm = ({ open, onClose, onSave, form, setForm, editing, title }) =
             <input id="available" type="checkbox" className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" checked={form.available} onChange={(e) => setForm({ ...form, available: e.target.checked })} />
             <label htmlFor="available" className="text-sm text-gray-700">Disponível</label>
           </div>
+
+          {editing && (
+            <div className="border-t border-gray-100 pt-6 mt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wider">Sub-opções (Sabores, Tamanhos, Adicionais)</h3>
+                <button
+                  onClick={handleAddCategory}
+                  className="text-xs bg-primary-100 text-primary-700 px-2.5 py-1 rounded hover:bg-primary-200 transition-colors"
+                >
+                  + Nova categoria
+                </button>
+              </div>
+
+              <div className="flex gap-2 items-end">
+                <input
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  placeholder="Ex: Tamanho"
+                  className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                />
+                <div className="flex items-center gap-1 text-xs">
+                  <input id="new-cat-required" type="checkbox" checked={newCatRequired} onChange={(e) => setNewCatRequired(e.target.checked)} className="rounded border-gray-300 text-primary-600" />
+                  <label htmlFor="new-cat-required" className="text-gray-600">Obrigatório</label>
+                </div>
+                <div className="flex items-center gap-1 text-xs">
+                  <input id="new-cat-multiple" type="checkbox" checked={newCatMultiple} onChange={(e) => setNewCatMultiple(e.target.checked)} className="rounded border-gray-300 text-primary-600" />
+                  <label htmlFor="new-cat-multiple" className="text-gray-600">Múltipla</label>
+                </div>
+                <button
+                  onClick={handleAddCategory}
+                  disabled={!newCatName.trim()}
+                  className="px-2.5 py-1.5 bg-primary-600 text-white rounded text-xs font-medium disabled:opacity-50 hover:bg-primary-700"
+                >
+                  Adicionar
+                </button>
+              </div>
+
+              {optionsLoading ? (
+                <p className="text-sm text-gray-400 text-center">Carregando opções...</p>
+              ) : optionCategories.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center">Nenhuma sub-opção cadastrada ainda.</p>
+              ) : (
+                optionCategories.map((cat) => (
+                  <div key={cat.id} className="border border-gray-100 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      {editingCatId === cat.id ? (
+                        <>
+                          <input
+                            value={editCatName}
+                            onChange={(e) => setEditCatName(e.target.value)}
+                            className="font-semibold text-gray-900 text-sm border border-gray-200 rounded px-2 py-1 focus:ring-2 focus:ring-primary-500 outline-none"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => handleSaveCategory(cat)}
+                            className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded hover:bg-primary-200"
+                          >
+                            Salvar
+                          </button>
+                          <button
+                            onClick={() => { setEditingCatId(null); setEditCatName(''); }}
+                            className="text-xs text-gray-500 ml-1 hover:text-gray-700"
+                          >
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-semibold text-gray-900 text-sm">{cat.name}</span>
+                          <div className="flex items-center gap-1.5">
+                            {cat.is_required && (
+                              <span className="text-[10px] bg-amber-100 text-amber-700 rounded px-1.5 py-0.5 font-bold">Obrigatório</span>
+                            )}
+                            {cat.allow_multiple && (
+                              <span className="text-[10px] bg-blue-100 text-blue-700 rounded px-1.5 py-0.5 font-bold">Múltipla</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 ml-2">
+                            <button
+                              onClick={() => { setEditingCatId(cat.id); setEditCatName(cat.name); }}
+                              className="text-xs text-primary-600 hover:underline"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCategory(cat.id)}
+                              className="text-xs text-red-500 hover:text-red-700"
+                            >
+                              Excluir
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      {(cat.product_option_values || []).map((v) => (
+                        <div key={v.id} className="flex items-center gap-2">
+                          {editingValueId === v.id ? (
+                            <>
+                              <input
+                                value={editValueName}
+                                onChange={(e) => setEditValueName(e.target.value)}
+                                className="flex-1 border border-gray-200 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                              />
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={editValuePrice}
+                                onChange={(e) => setEditValuePrice(e.target.value)}
+                                placeholder="0,00"
+                                className="w-20 border border-gray-200 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                              />
+                              <div className="flex items-center gap-1 text-xs">
+                                <input
+                                  type="checkbox"
+                                  defaultChecked={v.is_default}
+                                  className="rounded border-gray-300 text-primary-600"
+                                />
+                                <label className="text-gray-600">Padrão</label>
+                              </div>
+                              <button
+                                onClick={() => handleSaveValueEdit(v)}
+                                className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded hover:bg-primary-200"
+                              >
+                                Salvar
+                              </button>
+                              <button
+                                onClick={() => { setEditingValueId(null); setEditValueName(''); setEditValuePrice(''); }}
+                                className="text-xs text-gray-500 ml-1 hover:text-gray-700"
+                              >
+                                Cancelar
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <span className="flex-1 text-sm text-gray-700">{v.name}</span>
+                              <span className="w-16 text-right text-xs text-gray-500 font-mono">+R$ {(v.price_extra || 0).toFixed(2)}</span>
+                              {v.is_default && (
+                                <span className="text-[10px] bg-green-100 text-green-700 rounded px-1.5 py-0.5 font-bold">Padrão</span>
+                              )}
+                              <button
+                                onClick={() => handleStartValueEdit(v)}
+                                className="text-xs text-primary-600 hover:underline"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => handleDeleteValue(v.id)}
+                                className="text-xs text-red-500 hover:text-red-700"
+                              >
+                                Excluir
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                      {newValueDrafts[cat.id] ? (
+                        <div className="flex gap-2">
+                          <input
+                            value={newValueDrafts[cat.id].name}
+                            onChange={(e) => setNewValueDrafts((prev) => ({ ...prev, [catId]: { ...prev[catId], name: e.target.value } }))}
+                            placeholder="Nome da opção"
+                            className="flex-1 border border-gray-200 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                          />
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={newValueDrafts[cat.id].priceExtra}
+                            onChange={(e) => setNewValueDrafts((prev) => ({ ...prev, [catId]: { ...prev[catId], priceExtra: e.target.value } }))}
+                            placeholder="Extra"
+                            className="w-20 border border-gray-200 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                          />
+                          <button
+                            onClick={() => handleSaveValue(cat.id)}
+                            className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded hover:bg-primary-200"
+                          >
+                            Salvar
+                          </button>
+                          <button
+                            onClick={() => handleCancelValueDraft(cat.id)}
+                            className="text-xs text-gray-500 hover:text-gray-700"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleAddValueDraft(cat.id)}
+                          className="text-xs text-primary-600 hover:underline mt-1"
+                        >
+                          + Adicionar valor (ex: P, M, G)
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
           <div className="flex justify-end gap-2 mt-6">
             <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
             <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700">Salvar</button>
