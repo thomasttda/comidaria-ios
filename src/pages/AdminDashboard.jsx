@@ -18,13 +18,17 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
-import { MOCK_ORDERS, MOCK_FINANCE } from '../data/mockData';
+import { useOrders } from '../hooks/useOrders';
+import { useFinance } from '../hooks/useFinance';
 
 export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { finance, loading: financeLoading } = useFinance();
+  const { orders, loading: ordersLoading } = useOrders();
 
   const tabs = [
     { id: 'dashboard', icon: Home, label: 'Dashboard', path: '/admin' },
@@ -46,17 +50,17 @@ export const AdminDashboard = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardOverview />;
+        return <DashboardOverview finance={finance} recentOrders={orders} loading={financeLoading || ordersLoading} />;
       case 'produtos':
         return <ProductsManagement />;
       case 'financeiro':
-        return <FinanceOverview />;
+        return <FinanceOverview finance={finance} loading={financeLoading} />;
       case 'pedidos':
-        return <OrdersHistory />;
+        return <OrdersHistory orders={orders} loading={ordersLoading} />;
       case 'relatorios':
         return <ReportsOverview />;
       default:
-        return <DashboardOverview />;
+        return <DashboardOverview finance={finance} recentOrders={orders} loading={financeLoading || ordersLoading} />;
     }
   };
 
@@ -132,12 +136,18 @@ export const AdminDashboard = () => {
   );
 };
 
-const DashboardOverview = () => {
+const DashboardOverview = ({ finance, recentOrders, loading }) => {
+  if (loading) return <div className="flex items-center justify-center h-64">Carregando...</div>;
+
+  const todayRevenue = finance?.today_revenue || 0;
+  const todayOrders = finance?.today_orders || 0;
+  const avgTicket = finance?.avg_ticket || 0;
+
   const statCards = [
-    { label: 'Receita Hoje', value: 'R$ 1.245,50', icon: DollarSign, trend: '+12%', color: 'text-green-600 bg-green-50' },
-    { label: 'Pedidos Hoje', value: '14', icon: Package, trend: '+5%', color: 'text-blue-600 bg-blue-50' },
-    { label: 'Ticket Médio', value: 'R$ 68,45', icon: CreditCardIcon, trend: '-2%', color: 'text-purple-600 bg-purple-50' },
-    { label: 'Avaliação', value: '4.8 ★', icon: StarIcon, trend: '+0.2', color: 'text-yellow-600 bg-yellow-50' },
+    { label: 'Receita Hoje', value: `R$ ${todayRevenue.toFixed(2)}`, icon: DollarSign, trend: '', color: 'text-green-600 bg-green-50' },
+    { label: 'Pedidos Hoje', value: todayOrders, icon: Package, trend: '', color: 'text-blue-600 bg-blue-50' },
+    { label: 'Ticket Médio', value: `R$ ${avgTicket.toFixed(2)}`, icon: CreditCardIcon, trend: '', color: 'text-purple-600 bg-purple-50' },
+    { label: 'Avaliação', value: '— ★', icon: StarIcon, trend: '', color: 'text-yellow-600 bg-yellow-50' },
   ];
 
   return (
@@ -150,9 +160,11 @@ const DashboardOverview = () => {
             </div>
             <p className="text-sm font-medium text-gray-500">{stat.label}</p>
             <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
-            <span className={`text-xs font-medium ${stat.color === 'text-green-600 bg-green-50' ? 'text-green-600' : 'text-gray-600'}`}>
-              {stat.trend} vs mês passado
-            </span>
+            {stat.trend && (
+              <span className={`text-xs font-medium ${stat.color === 'text-green-600 bg-green-50' ? 'text-green-600' : 'text-gray-600'}`}>
+                {stat.trend} vs mês passado
+              </span>
+            )}
           </div>
         ))}
       </div>
@@ -161,24 +173,28 @@ const DashboardOverview = () => {
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
           <h3 className="font-bold text-gray-900 mb-4">Pedidos Recentes</h3>
           <div className="space-y-4">
-            {MOCK_ORDERS.map((order) => (
-              <div key={order.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{order.id}</p>
-                  <p className="text-xs text-gray-500">{order.customer}</p>
+            {recentOrders && recentOrders.length > 0 ? (
+              recentOrders.slice(0, 5).map((order) => (
+                <div key={order.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{order.id}</p>
+                    <p className="text-xs text-gray-500">{order.customer}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      order.status === 'entregue' ? 'bg-green-100 text-green-700' :
+                      order.status === 'preparando' ? 'bg-yellow-100 text-yellow-700' :
+                      order.status === 'a caminho' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                    }`}>
+                      {order.status}
+                    </span>
+                    <span className="text-sm font-bold text-gray-900">R$ {Number(order.total || 0).toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    order.status === 'entregue' ? 'bg-green-100 text-green-700' :
-                    order.status === 'preparando' ? 'bg-yellow-100 text-yellow-700' :
-                    order.status === 'a caminho' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                  }`}>
-                    {order.status}
-                  </span>
-                  <span className="text-sm font-bold text-gray-900">R$ {order.total.toFixed(2)}</span>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-400 text-sm">Nenhum pedido ainda</div>
+            )}
           </div>
         </div>
         <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-[300px] flex items-center justify-center">
@@ -342,29 +358,38 @@ const ProductForm = ({ open, onClose, onSave, form, setForm, editing, title }) =
   );
 };
 
-const FinanceOverview = () => {
+const FinanceOverview = ({ finance, loading }) => {
+  if (loading) return <div className="flex items-center justify-center h-64">Carregando...</div>;
+
+  const monthlyRevenue = finance?.monthly_revenue || 0;
+  const monthlyOrders = finance?.monthly_orders || 0;
+  const cancellations = finance?.monthly_cancellations || 0;
+  const avgTicket = finance?.avg_ticket || 0;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
         <h3 className="font-bold text-gray-900 mb-4">Receita Mensal</h3>
-        <div className="text-3xl font-bold text-gray-900 mb-2">R$ 18.420,00</div>
-        <p className="text-sm text-green-600 font-medium">+12% vs mês anterior</p>
+        <div className="text-3xl font-bold text-gray-900 mb-2">R$ {monthlyRevenue.toFixed(2)}</div>
+        <p className="text-sm text-gray-500">Média de R$ {avgTicket.toFixed(2)} por pedido</p>
       </div>
       <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
         <h3 className="font-bold text-gray-900 mb-4">Total de Pedidos</h3>
-        <div className="text-3xl font-bold text-gray-900 mb-2">142</div>
-        <p className="text-sm text-gray-500">Média de 4,7 pedidos/dia</p>
+        <div className="text-3xl font-bold text-gray-900 mb-2">{monthlyOrders}</div>
+        <p className="text-sm text-gray-500">Este mês</p>
       </div>
       <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
         <h3 className="font-bold text-gray-900 mb-4">Cancelamentos</h3>
-        <div className="text-3xl font-bold text-gray-900 mb-2">3</div>
-        <p className="text-sm text-red-500 font-medium">-2% vs mês anterior</p>
+        <div className="text-3xl font-bold text-gray-900 mb-2">{cancellations}</div>
+        <p className="text-sm text-gray-500">Este mês</p>
       </div>
     </div>
   );
 };
 
-const OrdersHistory = () => {
+const OrdersHistory = ({ orders, loading }) => {
+  if (loading) return <div className="flex items-center justify-center h-64">Carregando...</div>;
+
   return (
     <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
       <h3 className="font-bold text-gray-900 mb-6">Histórico Completo de Pedidos</h3>
@@ -380,23 +405,29 @@ const OrdersHistory = () => {
             </tr>
           </thead>
           <tbody>
-            {MOCK_ORDERS.map((order) => (
-              <tr key={order.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                <td className="py-4 font-medium text-gray-900">{order.id}</td>
-                <td className="py-4 text-gray-600">{order.customer}</td>
-                <td className="py-4 text-gray-600">{order.createdAt}</td>
-                <td className="py-4 text-right font-medium text-gray-900">R$ {order.total.toFixed(2)}</td>
-                <td className="py-4">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    order.status === 'entregue' ? 'bg-green-100 text-green-700' :
-                    order.status === 'preparando' ? 'bg-yellow-100 text-yellow-700' :
-                    order.status === 'a caminho' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                  }`}>
-                    {order.status}
-                  </span>
-                </td>
+            {orders && orders.length > 0 ? (
+              orders.map((order) => (
+                <tr key={order.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                  <td className="py-4 font-medium text-gray-900">{order.id}</td>
+                  <td className="py-4 text-gray-600">{order.customer}</td>
+                  <td className="py-4 text-gray-600">{new Date(order.created_at).toLocaleDateString('pt-BR')}</td>
+                  <td className="py-4 text-right font-medium text-gray-900">R$ {Number(order.total || 0).toFixed(2)}</td>
+                  <td className="py-4">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      order.status === 'entregue' ? 'bg-green-100 text-green-700' :
+                      order.status === 'preparando' ? 'bg-yellow-100 text-yellow-700' :
+                      order.status === 'a caminho' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="py-8 text-center text-gray-400 text-sm">Nenhum pedido ainda</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
