@@ -275,25 +275,22 @@ select
 -- Dados iniciais: Categorias
 -- ============================================
 insert into categories (name, slug, description, sort_order) values
-  ('Lanches', 'lanches', 'Hambúrgueres, sanduíches e lanches rápidos', 1),
-  ('Pizzas', 'pizzas', 'Pizzas variadas e especiais', 2),
-  ('Bebidas', 'bebidas', 'Refrigerantes, sucos e bebidas geladas', 3),
-  ('Sobremesas', 'sobremesas', 'Doces e sobremesas para completar', 4),
-  ('Acompanhamentos', 'acompanhamentos', 'Batatas, nuggets e outros acompanhamentos', 5)
+  ('Nhoque', 'nhoque', 'Nhoque caseiro com diversos molhos', 1),
+  ('Espaguete', 'espaguete', 'Espaguete com diversos molhos', 2)
 on conflict (slug) do nothing;
 
 -- ============================================
--- Dados iniciais: Produtos exemplo
+-- Dados iniciais: Produtos
 -- ============================================
 insert into products (category_id, name, description, price, image_url, is_available, is_featured, preparation_time, ingredients) values
-  ((select id from categories where slug = 'lanches'), 'X-Burger Tradicional', 'Pão, hambúrguer, queijo, alface, tomate e molho especial', 24.90, null, true, true, 15, ARRAY['pão', 'hambúrguer', 'queijo', 'alface', 'tomate']),
-  ((select id from categories where slug = 'lanches'), 'X-Burger Duplo', 'Pão, dois hambúrgueres, queijo, alface, tomate e molho especial', 34.90, null, true, true, 18, ARRAY['pão', 'hambúrguer', 'queijo', 'alface', 'tomate']),
-  ((select id from categories where slug = 'pizzas'), 'Pizza Margherita', 'Molho de tomate, muçarela, manjericão e azeite', 42.90, null, true, false, 25, ARRAY['molho de tomate', 'muçarela', 'manjericão']),
-  ((select id from categories where slug = 'pizzas'), 'Pizza Calabresa', 'Molho de tomate, muçarela, calabresa e cebola', 45.90, null, true, false, 25, ARRAY['molho de tomate', 'muçarela', 'calabresa', 'cebola']),
-  ((select id from categories where slug = 'bebidas'), 'Coca-Cola 350ml', 'Refrigerante Coca-Cola lata', 5.50, null, true, false, 2, ARRAY[]::text[]),
-  ((select id from categories where slug = 'bebidas'), 'Água Mineral 500ml', 'Água mineral sem gás', 3.50, null, true, false, 2, ARRAY[]::text[]),
-  ((select id from categories where slug = 'sobremesas'), 'Pudim de Leite', 'Pudim tradicional com calda de caramelo', 12.90, null, true, false, 5, ARRAY['leite', 'ovos', 'açúcar']),
-  ((select id from categories where slug = 'acompanhamentos'), 'Batata Frita', 'Porção de batata frita crocante', 14.90, null, true, false, 10, ARRAY['batata', 'óleo', 'sal'])
+  ((select id from categories where slug = 'nhoque'), 'Nhoque à Bolonhesa', 'Nhoque caseiro com molho bolonhesa', 32.90, null, true, true, 20, ARRAY['nhoque', 'molho bolonhesa']),
+  ((select id from categories where slug = 'nhoque'), 'Nhoque ao Frango', 'Nhoque caseiro com molho de frango', 32.90, null, true, false, 20, ARRAY['nhoque', 'frango']),
+  ((select id from categories where slug = 'nhoque'), 'Nhoque ao Lombo', 'Nhoque caseiro com molho de lombo suíno', 34.90, null, true, false, 20, ARRAY['nhoque', 'lombo']),
+  ((select id from categories where slug = 'nhoque'), 'Nhoque de Frutos do Mar', 'Nhoque caseiro com molho de frutos do mar', 38.90, null, true, false, 20, ARRAY['nhoque', 'frutos do mar']),
+  ((select id from categories where slug = 'espaguete'), 'Espaguete à Bolonhesa', 'Espaguete com molho bolonhesa', 32.90, null, true, true, 20, ARRAY['espaguete', 'molho bolonhesa']),
+  ((select id from categories where slug = 'espaguete'), 'Espaguete ao Frango', 'Espaguete com molho de frango', 32.90, null, true, false, 20, ARRAY['espaguete', 'frango']),
+  ((select id from categories where slug = 'espaguete'), 'Espaguete ao Lombo', 'Espaguete com molho de lombo suíno', 34.90, null, true, false, 20, ARRAY['espaguete', 'lombo']),
+  ((select id from categories where slug = 'espaguete'), 'Espaguete de Frutos do Mar', 'Espaguete com molho de frutos do mar', 38.90, null, true, false, 20, ARRAY['espaguete', 'frutos do mar'])
 on conflict do nothing;
 
 -- ============================================
