@@ -1,0 +1,22 @@
+{
+  "name": "Comidaria IOS",
+  "short_name": "Comidaria",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#E63946",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo_comidaria.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo_comidaria.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

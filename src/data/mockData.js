@@ -1,0 +1,143 @@
+export const CATEGORIES = [
+  { id: 1, name: 'Hambúrgueres', image: '/images/cat-burger.jpg' },
+  { id: 2, name: 'Pizzas', image: '/images/cat-pizza.jpg' },
+  { id: 3, name: 'Japonesa', image: '/images/cat-sushi.jpg' },
+  { id: 4, name: 'Sobremesas', image: '/images/cat-dessert.jpg' },
+  { id: 5, name: 'Bebidas', image: '/images/cat-drinks.jpg' },
+  { id: 6, name: 'Lanches Rápidos', image: '/images/cat-fastfood.jpg' },
+];
+
+export const PRODUCTS = [
+  {
+    id: 1,
+    name: 'Hambúrguer Smash Comidaria',
+    description: 'Pão brioche, smash beef, queijo cheddar, alface e molho especial da casa.',
+    price: 34.90,
+    category: 'Hambúrgueres',
+    image: '/images/prod-1.jpg',
+    rating: 4.8,
+    reviews: 124,
+    available: true,
+  },
+  {
+    id: 2,
+    name: 'Pizza Margherita',
+    description: 'Molho de tomate, muçarela, manjericão fresco e azeite extra virgem.',
+    price: 42.50,
+    category: 'Pizzas',
+    image: '/images/prod-2.jpg',
+    rating: 4.6,
+    reviews: 89,
+    available: true,
+  },
+  {
+    id: 3,
+    name: 'Sushi Roll Deluxe',
+    description: 'Salmão, cream cheese, pepino e molho teriyaki (8 peças).',
+    price: 48.00,
+    category: 'Japonesa',
+    image: '/images/prod-3.jpg',
+    rating: 4.9,
+    reviews: 210,
+    available: true,
+  },
+  {
+    id: 4,
+    name: 'Brownie com Sorvete',
+    description: 'Brownie de chocolate meio amargo com sorvete de baunilha.',
+    price: 18.90,
+    category: 'Sobremesas',
+    image: '/images/prod-4.jpg',
+    rating: 4.7,
+    reviews: 67,
+    available: true,
+  },
+  {
+    id: 5,
+    name: 'Refrigerante Lata 350ml',
+    description: 'Coca-Cola, Guaraná ou Sprite geladinho.',
+    price: 6.50,
+    category: 'Bebidas',
+    image: '/images/prod-5.jpg',
+    rating: 4.5,
+    reviews: 43,
+    available: true,
+  },
+  {
+    id: 6,
+    name: 'Batata Frita Premium',
+    description: 'Batatas rústicas com ervas finas e molho barbecue.',
+    price: 22.00,
+    category: 'Lanches Rápidos',
+    image: '/images/prod-6.jpg',
+    rating: 4.4,
+    reviews: 95,
+    available: true,
+  },
+];
+
+export const BANNERS = [
+  {
+    id: 1,
+    title: 'Segunda com Desconto',
+    subtitle: '20% OFF em todos os hambúrgueres',
+    image: '/images/banner-1.jpg',
+    link: '/categoria/hamburgueres',
+  },
+  {
+    id: 2,
+    title: 'Sexta de Pizza',
+    subtitle: 'Compre 1 pizza e leve a segunda pela metade do preço',
+    image: '/images/banner-2.jpg',
+    link: '/categoria/pizzas',
+  },
+  {
+    id: 3,
+    title: 'Sobremesa Grátis',
+    subtitle: 'Frete grátis acima de R$ 80,00',
+    image: '/images/banner-3.jpg',
+    link: '/categoria/sobremesas',
+  },
+];
+
+export const MOCK_ORDERS = [
+  {
+    id: '#COM-001',
+    customer: 'João Silva',
+    items: 3,
+    total: 106.30,
+    status: 'entregue',
+    createdAt: '2026-11-18',
+  },
+  {
+    id: '#COM-002',
+    customer: 'Maria Oliveira',
+    items: 2,
+    total: 55.90,
+    status: 'preparando',
+    createdAt: '2026-11-19',
+  },
+  {
+    id: '#COM-003',
+    customer: 'Carlos Souza',
+    items: 4,
+    total: 120.00,
+    status: 'a caminho',
+    createdAt: '2026-11-19',
+  },
+  {
+    id: '#COM-004',
+    customer: 'Ana Costa',
+    items: 1,
+    total: 18.90,
+    status: 'pendente',
+    createdAt: '2026-11-20',
+  },
+];
+
+export const MOCK_FINANCE = {
+  todayRevenue: 1245.50,
+  todayOrders: 14,
+  monthlyRevenue: 18420.00,
+  avgTicket: 68.45,
+};
