@@ -9,6 +9,7 @@ import { AdminLogin } from './pages/AdminLogin';
 import { OrderMonitoring } from './pages/OrderMonitoring';
 import { CategoryManagement } from './pages/CategoryManagement';
 import { BannerManagement } from './pages/BannerManagement';
+import { Checkout } from './pages/Checkout';
 
 // Componente wrapper para proteger rotas de admin
 const AdminRoute = ({ children }) => {
@@ -26,6 +27,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Layout><Home /></Layout>} />
+            <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
             <Route path="/produto/:id" element={<Layout><ProductDetail /></Layout>} />
             <Route path="/login" element={<AdminLogin />} />
             <Route

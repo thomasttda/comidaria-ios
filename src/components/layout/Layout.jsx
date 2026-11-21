@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import {
   Menu,
@@ -25,6 +25,7 @@ export const Layout = ({ children }) => {
   const { isAuthenticated, user, logout } = useAuth();
   const { items, count, total, clearCart, updateQuantity, removeItem } = useCart();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinks = [
     { icon: Home, label: 'Início', path: '/' },
@@ -253,6 +254,7 @@ export const Layout = ({ children }) => {
             </div>
             <button
               disabled={items.length === 0}
+              onClick={() => items.length > 0 && navigate('/checkout')}
               className={`w-full py-3 rounded-xl font-medium text-white transition-all disabled:opacity-50 ${
                 items.length > 0
                   ? 'bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'
