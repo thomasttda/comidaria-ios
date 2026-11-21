@@ -17,6 +17,8 @@ import {
   AlertCircle,
   Sliders,
   Bell,
+  Image,
+  Link,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
@@ -24,6 +26,8 @@ import { useOrders } from '../hooks/useOrders';
 import { useFinance } from '../hooks/useFinance';
 import { useProductOptions } from '../hooks/useProductOptions';
 import { OrderMonitoring } from './OrderMonitoring';
+import { CategoryManagement } from './CategoryManagement';
+import { BannerManagement } from './BannerManagement';
 
 export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -41,6 +45,8 @@ export const AdminDashboard = () => {
     { id: 'financeiro', icon: DollarSign, label: 'Financeiro', path: '/admin/financeiro' },
     { id: 'pedidos', icon: Clock, label: 'Histórico de Pedidos', path: '/admin/pedidos' },
     { id: 'monitoramento', icon: Bell, label: 'Monitoramento', path: '/admin/monitoramento' },
+    { id: 'categorias', icon: Image, label: 'Categorias', path: '/admin/categorias' },
+    { id: 'banners', icon: Link, label: 'Banners', path: '/admin/banners' },
     { id: 'relatorios', icon: BarChart3, label: 'Relatórios', path: '/admin/relatorios' },
     { id: 'configuracoes', icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
   ];
@@ -65,6 +71,10 @@ export const AdminDashboard = () => {
         return <OrdersHistory orders={orders} loading={loading} />;
       case 'monitoramento':
         return <OrderMonitoring />;
+      case 'categorias':
+        return <CategoryManagement />;
+      case 'banners':
+        return <BannerManagement />;
       case 'relatorios':
         return <ReportsOverview />;
       default:

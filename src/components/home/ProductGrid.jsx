@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Star } from 'lucide-react';
-import { CATEGORIES } from '../../data/mockData';
 import { useCart } from '../../context/CartContext';
 import { useProducts } from '../../hooks/useProducts';
+import { useCategories } from '../../hooks/useCategories';
 
 export const ProductGrid = () => {
   const { addItem } = useCart();
   const { products, loading } = useProducts();
+  const { loading: categoriesLoading } = useCategories();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -16,7 +17,7 @@ export const ProductGrid = () => {
 
   const availableProducts = products.filter((p) => p.available !== false);
 
-  if (!mounted || loading) {
+  if (!mounted || loading || categoriesLoading) {
     return (
       <section className="mb-12">
         <div className="flex items-center justify-between mb-8">
@@ -108,10 +109,13 @@ export const ProductGrid = () => {
 };
 
 export const CategoryChips = () => {
+  const { categories } = useCategories();
+  const activeCategories = categories.filter((c) => c.is_active !== false);
+
   return (
     <section className="mb-8">
       <div className="flex flex-wrap gap-2 pb-2 overflow-x-auto no-scrollbar custom-scrollbar">
-        {CATEGORIES.map((cat) => (
+        {activeCategories.map((cat) => (
           <button
             key={cat.id}
             className="whitespace-nowrap px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-medium text-gray-600 hover:border-primary-300 hover:text-primary-600 hover:shadow-sm transition-all shadow-sm"

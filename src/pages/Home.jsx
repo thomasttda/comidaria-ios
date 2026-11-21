@@ -1,7 +1,6 @@
 import { BannerRoll } from '../components/home/BannerRoll';
 import { CategoryChips } from '../components/home/ProductGrid';
 import { ProductGrid } from '../components/home/ProductGrid';
-import { CATEGORIES } from '../data/mockData';
 
 export const Home = () => {
   return (

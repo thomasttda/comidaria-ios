@@ -1,26 +1,35 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, Play, Pause } from 'lucide-react';
-import { BANNERS } from '../../data/mockData';
+import { useBanners } from '../../hooks/useBanners';
 
 export const BannerRoll = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [timer, setTimer] = useState(null);
+  const { banners, loading } = useBanners();
 
   useEffect(() => {
-    if (isPlaying) {
-      setTimer(setInterval(() => setCurrentIndex((i) => (i + 1) % BANNERS.length), 5000));
+    if (isPlaying && banners.length > 0) {
+      setTimer(setInterval(() => setCurrentIndex((i) => (i + 1) % banners.length), 5000));
     }
     return () => clearInterval(timer);
-  }, [isPlaying]);
+  }, [isPlaying, banners.length]);
 
   const goToSlide = (index) => {
     setCurrentIndex(index);
   };
 
+  if (loading || banners.length === 0) {
+    return (
+      <section className="relative w-full overflow-hidden rounded-3xl bg-gray-100 mb-8 aspect-[16/6] lg:aspect-[16/7] flex items-center justify-center">
+        <p className="text-gray-500 text-sm">Nenhum banner cadastrado</p>
+      </section>
+    );
+  }
+
   return (
     <section className="relative w-full overflow-hidden rounded-3xl bg-gray-100 mb-8 aspect-[16/6] lg:aspect-[16/7]">
-      {BANNERS.map((banner, idx) => (
+      {banners.map((banner, idx) => (
         <div
           key={banner.id}
           className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out ${
@@ -30,7 +39,7 @@ export const BannerRoll = () => {
           <div className="w-full h-full relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
             <img
-              src={banner.image}
+              src={banner.image_url}
               alt={banner.title}
               className="w-full h-full object-cover scale-105 transition-transform duration-700"
               loading="lazy"
@@ -46,13 +55,15 @@ export const BannerRoll = () => {
                 <p className="text-lg lg:text-xl text-gray-100 drop-shadow-sm max-w-md">
                   {banner.subtitle}
                 </p>
-                <button
-                  onClick={() => goToSlide(idx)}
-                  className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary-600 rounded-full font-semibold hover:bg-gray-100 transition-colors"
-                >
-                  Ver oferta
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                {banner.link_url && (
+                  <button
+                    onClick={() => goToSlide(idx)}
+                    className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary-600 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+                  >
+                    Ver oferta
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -60,20 +71,20 @@ export const BannerRoll = () => {
       ))}
 
       <button
-        onClick={() => goToSlide((currentIndex - 1 + BANNERS.length) % BANNERS.length)}
+        onClick={() => goToSlide((currentIndex - 1 + banners.length) % banners.length)}
         className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/30 text-white flex items-center justify-center hover:bg-black/50 transition-colors backdrop-blur-sm"
       >
         <ArrowLeft className="w-4 h-4" />
       </button>
       <button
-        onClick={() => goToSlide((currentIndex + 1) % BANNERS.length)}
+        onClick={() => goToSlide((currentIndex + 1) % banners.length)}
         className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/30 text-white flex items-center justify-center hover:bg-black/50 transition-colors backdrop-blur-sm"
       >
         <ArrowRight className="w-4 h-4" />
       </button>
 
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-        {BANNERS.map((_, idx) => (
+        {banners.map((_, idx) => (
           <button
             key={idx}
             onClick={() => goToSlide(idx)}

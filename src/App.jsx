@@ -7,6 +7,8 @@ import { ProductDetail } from './pages/ProductDetail';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminLogin } from './pages/AdminLogin';
 import { OrderMonitoring } from './pages/OrderMonitoring';
+import { CategoryManagement } from './pages/CategoryManagement';
+import { BannerManagement } from './pages/BannerManagement';
 
 // Componente wrapper para proteger rotas de admin
 const AdminRoute = ({ children }) => {
@@ -47,6 +49,22 @@ function App() {
               element={
                 <AdminRoute>
                   <Layout><OrderMonitoring /></Layout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/categorias"
+              element={
+                <AdminRoute>
+                  <Layout><CategoryManagement /></Layout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/banners"
+              element={
+                <AdminRoute>
+                  <Layout><BannerManagement /></Layout>
                 </AdminRoute>
               }
             />
