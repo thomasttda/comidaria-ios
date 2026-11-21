@@ -235,6 +235,21 @@ create policy "Users can insert own order items"
   ));
 
 -- ============================================
+-- Storage: bucket comidaria-images
+-- ============================================
+-- O Supabase NÃO permite criar buckets via SQL.
+-- Crie manualmente no Dashboard do Supabase:
+--   Storage > Buckets > New bucket
+--   Nome: comidaria-images
+--   Público: não (private)
+--   Depois, em Policies do bucket, adicione:
+--     - "Allow public read access": SELECT, com (true)
+--     - "Allow authenticated uploads": INSERT, com auth.role() = 'authenticated'
+-- Ou, se quiser upload público sem login:
+--     - "Allow public uploads": INSERT, com (true)
+-- ============================================
+
+-- ============================================
 -- Tabela: banners
 -- ============================================
 create table if not exists banners (

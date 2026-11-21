@@ -21,7 +21,7 @@ export const AdminLogin = () => {
       if (success) {
         navigate('/admin');
       } else {
-        setError('Credenciais inválidas. Tente: comidaria@admin.com / admin@comidaria');
+        setError('Credenciais inválidas. Tente novamente.');
         setLoading(false);
       }
     }, 800);
@@ -49,7 +49,7 @@ export const AdminLogin = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="comidaria@admin.com"
+                  placeholder="seu@email.com"
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
                 />
               </div>
@@ -96,14 +96,6 @@ export const AdminLogin = () => {
               )}
             </button>
           </form>
-
-          <div className="mt-6 text-center pt-6 border-t border-gray-100">
-            <p className="text-sm text-gray-500 mb-2">Credenciais de teste:</p>
-            <p className="text-xs font-mono text-gray-400 bg-gray-50 p-2 rounded-lg border border-gray-100">
-              E-mail: comidaria@admin.com<br />
-              Senha: admin@comidaria
-            </p>
-          </div>
         </div>
       </div>
     </div>
