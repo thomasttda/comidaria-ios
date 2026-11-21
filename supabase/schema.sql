@@ -141,15 +141,15 @@ create policy "Categories are viewable by everyone"
 
 create policy "Categories are insertable by admins"
   on categories for insert
-  with check (auth.jwt() ->> 'role' = 'admin');
+  with check (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 create policy "Categories are updatable by admins"
   on categories for update
-  using (auth.jwt() ->> 'role' = 'admin');
+  using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 create policy "Categories are deletable by admins"
   on categories for delete
-  using (auth.jwt() ->> 'role' = 'admin');
+  using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 -- ============================================
 -- Políticas: products (leitura pública, escrita admin)
@@ -160,15 +160,15 @@ create policy "Products are viewable by everyone"
 
 create policy "Products are insertable by admins"
   on products for insert
-  with check (auth.jwt() ->> 'role' = 'admin');
+  with check (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 create policy "Products are updatable by admins"
   on products for update
-  using (auth.jwt() ->> 'role' = 'admin');
+  using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 create policy "Products are deletable by admins"
   on products for delete
-  using (auth.jwt() ->> 'role' = 'admin');
+  using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 -- ============================================
 -- Políticas: users (próprio usuário)
@@ -257,8 +257,8 @@ create policy "Banners are viewable by everyone"
 
 create policy "Banners are manageable by admins"
   on banners for all
-  using (auth.jwt() ->> 'role' = 'admin')
-  with check (auth.jwt() ->> 'role' = 'admin');
+  using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin')
+  with check (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 -- ============================================
 -- View: finance_summary
@@ -358,10 +358,9 @@ alter table product_option_categories enable row level security;
 alter table product_option_values enable row level security;
 
 create policy "Product option categories are viewable by everyone" on product_option_categories for select using (true);
-create policy "Product option categories are manageable by admins" on product_option_categories for all using (auth.jwt() ->> 'role' = 'admin') with check (auth.jwt() ->> 'role' = 'admin');
+create policy "Product option categories are manageable by admins" on product_option_categories for all using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin') with check (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
-create policy "Product option values are viewable by everyone" on product_option_values for select using (true);
-create policy "Product option values are manageable by admins" on product_option_values for all using (auth.jwt() ->> 'role' = 'admin') with check (auth.jwt() ->> 'role' = 'admin');
+create policy "Product option values are manageable by admins" on product_option_values for all using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin') with check (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 -- Triggers updated_at
 drop trigger if exists update_product_option_categories_updated_at on product_option_categories;
