@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 const ADMIN_CREDENTIALS = {
   email: 'comidaria@admin.com',
@@ -13,8 +14,29 @@ export const AuthProvider = ({ children }) => {
   );
   const [user, setUser] = useState(null);
 
-  const login = (email, password) => {
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setIsAuthenticated(true);
+        setUser({
+          email: session.user.email,
+          role: session.user.app_metadata?.role || 'admin',
+        });
+        localStorage.setItem('comidaria_admin', 'true');
+      }
+    });
+  }, []);
+
+  const login = async (email, password) => {
     if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        console.error(error);
+        return false;
+      }
       setIsAuthenticated(true);
       setUser({ email, role: 'admin' });
       localStorage.setItem('comidaria_admin', 'true');
@@ -23,7 +45,8 @@ export const AuthProvider = ({ children }) => {
     return false;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem('comidaria_admin');
