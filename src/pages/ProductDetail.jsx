@@ -128,11 +128,11 @@ export const ProductDetail = () => {
           </div>
         )}
         <div className="flex items-center justify-between">
-          <span className={`px-2 py-1 rounded text-xs font-medium ${
-            product.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-          }`}>
-            {product.available ? 'Disponível' : 'Indisponível'}
-          </span>
+            <span className={`px-2 py-1 rounded text-xs font-medium ${
+              product.is_available !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            }`}>
+              {product.is_available !== false ? 'Disponível' : 'Indisponível'}
+            </span>
           <span className="text-xs text-gray-500">{product.preparation_time} min de preparo</span>
         </div>
       </div>
@@ -141,7 +141,7 @@ export const ProductDetail = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
-            {product.available === false && <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">Indisponível</span>}
+            {product.is_available === false && <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">Indisponível</span>}
           </div>
           <p className="text-gray-600 text-sm">{product.description}</p>
           {product.categories && (
@@ -240,9 +240,9 @@ export const ProductDetail = () => {
 
         <button
           onClick={handleAddToCart}
-          disabled={!product.available || missingRequired}
+          disabled={product.is_available === false || missingRequired}
           className={`w-full py-3 rounded-xl font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
-            product.available && !missingRequired
+            product.is_available !== false && !missingRequired
               ? 'bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'
               : 'bg-gray-200 text-gray-400'
           }`}
@@ -258,7 +258,7 @@ export const ProductDetail = () => {
           )}
         </button>
         <p className="text-xs text-gray-400 text-center">
-          {product.available && !missingRequired ? '' : 'Selecione as opções obrigatórias para adicionar.'}
+          {product.is_available !== false && !missingRequired ? '' : 'Selecione as opções obrigatórias para adicionar.'}
         </p>
       </div>
     </div>

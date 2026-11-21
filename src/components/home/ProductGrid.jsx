@@ -15,7 +15,7 @@ export const ProductGrid = () => {
     setMounted(true);
   }, []);
 
-  const availableProducts = products.filter((p) => p.available !== false);
+  const availableProducts = products.filter((p) => p.is_available !== false);
 
   if (!mounted || loading || categoriesLoading) {
     return (
@@ -101,7 +101,7 @@ export const ProductGrid = () => {
                         price: Number(product.price || 0),
                         image: product.image_url || '/images/prod-placeholder.jpg',
                         category: product.category || '',
-                        available: product.available !== false,
+                        available: product.is_available !== false,
                       });
                     }}
                     className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
