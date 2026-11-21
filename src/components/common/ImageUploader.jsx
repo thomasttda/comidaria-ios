@@ -6,8 +6,31 @@ const BUCKET = 'comidaria-images';
 
 export const ImageUploader = ({ value, onChange, accept = 'image/*', maxSizeMB = 5 }) => {
   const [preview, setPreview] = useState(value || null);
+  const [urlInput, setUrlInput] = useState(value || '');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
+
+  const handleUrlChange = useCallback((e) => {
+    setUrlInput(e.target.value);
+    setError(null);
+  }, []);
+
+  const handleApplyUrl = useCallback(() => {
+    if (!urlInput.trim()) {
+      setPreview(null);
+      onChange(null);
+      setError(null);
+      return;
+    }
+    try {
+      new URL(urlInput);
+      setPreview(urlInput.trim());
+      onChange(urlInput.trim());
+      setError(null);
+    } catch {
+      setError('URL inválida');
+    }
+  }, [urlInput, onChange]);
 
   const handleFileSelect = useCallback(async (e) => {
     const file = e.target.files?.[0];
@@ -36,6 +59,7 @@ export const ImageUploader = ({ value, onChange, accept = 'image/*', maxSizeMB =
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(fileName);
+      setUrlInput(publicUrl);
       onChange(publicUrl);
     } catch (err) {
       console.error(err);
@@ -49,7 +73,9 @@ export const ImageUploader = ({ value, onChange, accept = 'image/*', maxSizeMB =
 
   const handleRemove = () => {
     setPreview(null);
+    setUrlInput('');
     onChange(null);
+    setError(null);
   };
 
   return (
@@ -75,19 +101,39 @@ export const ImageUploader = ({ value, onChange, accept = 'image/*', maxSizeMB =
           )}
         </div>
       ) : (
-        <button
-          onClick={(e) => e.target.value && e.target.click()}
-          className="flex flex-col items-center justify-center gap-2 w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors"
-        >
-          <Upload className="w-5 h-5 text-gray-400" />
-          <span className="text-xs text-gray-500">Escolher imagem</span>
-          <input
-            type="file"
-            accept={accept}
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-        </button>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Cole a URL da imagem..."
+              value={urlInput}
+              onChange={handleUrlChange}
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm"
+            />
+            <button
+              onClick={handleApplyUrl}
+              disabled={!urlInput.trim()}
+              className="px-3 py-2 bg-primary-600 text-white rounded-lg text-xs font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Aplicar URL
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              id="image-file-input"
+              type="file"
+              accept={accept}
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <label
+              htmlFor="image-file-input"
+              className="flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors text-sm text-gray-600 cursor-pointer"
+            >
+              <Upload className="w-4 h-4" /> Enviar arquivo
+            </label>
+          </div>
+        </div>
       )}
 
       {error && <span className="text-xs text-red-600">{error}</span>}
