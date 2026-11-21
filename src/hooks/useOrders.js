@@ -7,13 +7,18 @@ export function useOrders() {
 
   const fetchOrders = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`, order_items(*, products(name))`)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`, order_items(*, products(name))`)
+        .order('created_at', { ascending: false });
 
-    if (!error) setOrders(data || []);
-    setLoading(false);
+      if (!error) setOrders(data || []);
+    } catch (err) {
+      console.error('useOrders fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

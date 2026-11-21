@@ -7,14 +7,19 @@ export function useBanners() {
 
   const fetchBanners = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('banners')
-      .select('*')
-      .eq('active', true)
-      .order('sort_order');
+    try {
+      const { data, error } = await supabase
+        .from('banners')
+        .select('*')
+        .eq('active', true)
+        .order('sort_order');
 
-    if (!error) setBanners(data || []);
-    setLoading(false);
+      if (!error) setBanners(data || []);
+    } catch (err) {
+      console.error('useBanners fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

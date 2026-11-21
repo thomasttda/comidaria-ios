@@ -7,13 +7,18 @@ export function useCategories() {
 
   const fetchCategories = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('sort_order');
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('sort_order');
 
-    if (!error) setCategories(data || []);
-    setLoading(false);
+      if (!error) setCategories(data || []);
+    } catch (err) {
+      console.error('useCategories fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

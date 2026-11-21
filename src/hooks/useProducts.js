@@ -7,19 +7,24 @@ export function useProducts() {
 
   const fetchProducts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('products')
-      .select(`, categories(name)`)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select(`, categories(name)`)
+        .order('created_at', { ascending: false });
 
-    if (!error) {
-      const formatted = (data || []).map((p) => ({
-        ...p,
-        category: p.categories?.name || '',
-      }));
-      setProducts(formatted);
+      if (!error) {
+        const formatted = (data || []).map((p) => ({
+          ...p,
+          category: p.categories?.name || '',
+        }));
+        setProducts(formatted);
+      }
+    } catch (err) {
+      console.error('useProducts fetch error:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
