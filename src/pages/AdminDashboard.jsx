@@ -28,6 +28,7 @@ import { useProductOptions } from '../hooks/useProductOptions';
 import { OrderMonitoring } from './OrderMonitoring';
 import { CategoryManagement } from './CategoryManagement';
 import { BannerManagement } from './BannerManagement';
+import { ImageUploader } from '../components/common/ImageUploader';
 
 export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -458,7 +459,7 @@ const ProductForm = ({ open, onClose, onSave, form, setForm, editing, editingId,
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Imagem URL</label>
-            <input className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+            <ImageUploader value={form.image_url} onChange={(url) => setForm({ ...form, image_url: url })} />
           </div>
           <div className="flex items-center gap-2">
             <input id="available" type="checkbox" className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" checked={form.available} onChange={(e) => setForm({ ...form, available: e.target.checked })} />

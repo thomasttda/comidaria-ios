@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 import { useCategories } from '../hooks/useCategories';
+import { ImageUploader } from '../components/common/ImageUploader';
 
 export const CategoryManagement = () => {
   const { categories, loading, refetch, createCategory, updateCategory, deleteCategory } = useCategories();
@@ -130,7 +131,7 @@ export const CategoryManagement = () => {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">URL da Imagem</label>
-                <input className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
+                <ImageUploader value={form.image_url} onChange={(url) => setForm({ ...form, image_url: url })} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Ordem de Exibição</label>
