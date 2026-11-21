@@ -16,12 +16,14 @@ import {
   CheckCircle,
   AlertCircle,
   Sliders,
+  Bell,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
 import { useOrders } from '../hooks/useOrders';
 import { useFinance } from '../hooks/useFinance';
 import { useProductOptions } from '../hooks/useProductOptions';
+import { OrderMonitoring } from './OrderMonitoring';
 
 export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -38,6 +40,7 @@ export const AdminDashboard = () => {
     { id: 'produtos', icon: Package, label: 'Editar Produtos', path: '/admin/produtos' },
     { id: 'financeiro', icon: DollarSign, label: 'Financeiro', path: '/admin/financeiro' },
     { id: 'pedidos', icon: Clock, label: 'Histórico de Pedidos', path: '/admin/pedidos' },
+    { id: 'monitoramento', icon: Bell, label: 'Monitoramento', path: '/admin/monitoramento' },
     { id: 'relatorios', icon: BarChart3, label: 'Relatórios', path: '/admin/relatorios' },
     { id: 'configuracoes', icon: Settings, label: 'Configurações', path: '/admin/configuracoes' },
   ];
@@ -60,6 +63,8 @@ export const AdminDashboard = () => {
         return <FinanceOverview finance={finance} loading={loading} />;
       case 'pedidos':
         return <OrdersHistory orders={orders} loading={loading} />;
+      case 'monitoramento':
+        return <OrderMonitoring />;
       case 'relatorios':
         return <ReportsOverview />;
       default:
