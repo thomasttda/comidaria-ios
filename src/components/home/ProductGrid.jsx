@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Star } from 'lucide-react';
+import { Plus, Star, RefreshCw } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useProducts } from '../../hooks/useProducts';
 import { useCategories } from '../../hooks/useCategories';
 
 export const ProductGrid = () => {
   const { addItem } = useCart();
-  const { products, loading } = useProducts();
+  const { products, loading, error, refetch } = useProducts();
   const { loading: categoriesLoading } = useCategories();
   const [mounted, setMounted] = useState(false);
 
@@ -50,7 +50,17 @@ export const ProductGrid = () => {
         </Link>
       </div>
 
-      {availableProducts.length === 0 ? (
+      {error ? (
+        <div className="text-center py-12">
+          <p className="text-red-600 text-sm mb-3">{error}</p>
+          <button
+            onClick={refetch}
+            className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" /> Tentar novamente
+          </button>
+        </div>
+      ) : availableProducts.length === 0 ? (
         <div className="text-center py-12 text-gray-500 text-sm">Nenhum produto disponível no momento.</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -109,7 +119,10 @@ export const ProductGrid = () => {
 };
 
 export const CategoryChips = () => {
-  const { categories } = useCategories();
+  const { categories, loading, error } = useCategories();
+
+  if (loading || error) return null;
+
   const activeCategories = categories.filter((c) => c.is_active !== false);
 
   return (

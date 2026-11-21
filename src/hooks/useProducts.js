@@ -4,24 +4,26 @@ import { supabase } from '../lib/supabase';
 export function useProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchProducts = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const { data, error } = await supabase
+      const { data, error: supabaseError } = await supabase
         .from('products')
         .select(`, categories(name)`)
         .order('created_at', { ascending: false });
 
-      if (!error) {
-        const formatted = (data || []).map((p) => ({
-          ...p,
-          category: p.categories?.name || '',
-        }));
-        setProducts(formatted);
-      }
+      if (supabaseError) throw supabaseError;
+      const formatted = (data || []).map((p) => ({
+        ...p,
+        category: p.categories?.name || '',
+      }));
+      setProducts(formatted);
     } catch (err) {
       console.error('useProducts fetch error:', err);
+      setError(err.message || 'Erro ao carregar produtos');
     } finally {
       setLoading(false);
     }
@@ -52,5 +54,5 @@ export function useProducts() {
     return { error };
   };
 
-  return { products, loading, refetch: fetchProducts, createProduct, updateProduct, deleteProduct };
+  return { products, loading, error, refetch: fetchProducts, createProduct, updateProduct, deleteProduct };
 }

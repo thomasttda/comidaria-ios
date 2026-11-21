@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ArrowRight, Play, Pause } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Play, Pause, RefreshCw } from 'lucide-react';
 import { useBanners } from '../../hooks/useBanners';
 
 export const BannerRoll = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [timer, setTimer] = useState(null);
-  const { banners, loading } = useBanners();
+  const { banners, loading, error, refetch } = useBanners();
 
   useEffect(() => {
     if (isPlaying && banners.length > 0) {
@@ -19,10 +19,30 @@ export const BannerRoll = () => {
     setCurrentIndex(index);
   };
 
-  if (loading || banners.length === 0) {
+  if (loading) {
     return (
       <section className="relative w-full overflow-hidden rounded-3xl bg-gray-100 mb-8 aspect-[16/6] lg:aspect-[16/7] flex items-center justify-center">
-        <p className="text-gray-500 text-sm">Nenhum banner cadastrado</p>
+        <p className="text-gray-500 text-sm">Carregando banners...</p>
+      </section>
+    );
+  }
+
+  if (error || banners.length === 0) {
+    return (
+      <section className="relative w-full overflow-hidden rounded-3xl bg-gray-100 mb-8 aspect-[16/6] lg:aspect-[16/7] flex flex-col items-center justify-center p-8 text-center">
+        {error ? (
+          <>
+            <p className="text-red-600 text-sm mb-3">{error}</p>
+            <button
+              onClick={refetch}
+              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" /> Tentar novamente
+            </button>
+          </>
+        ) : (
+          <p className="text-gray-500 text-sm">Nenhum banner cadastrado</p>
+        )}
       </section>
     );
   }

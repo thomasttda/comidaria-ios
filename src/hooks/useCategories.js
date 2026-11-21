@@ -4,18 +4,22 @@ import { supabase } from '../lib/supabase';
 export function useCategories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchCategories = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const { data, error } = await supabase
+      const { data, error: supabaseError } = await supabase
         .from('categories')
         .select('*')
         .order('sort_order');
 
-      if (!error) setCategories(data || []);
+      if (supabaseError) throw supabaseError;
+      setCategories(data || []);
     } catch (err) {
       console.error('useCategories fetch error:', err);
+      setError(err.message || 'Erro ao carregar categorias');
     } finally {
       setLoading(false);
     }
@@ -43,5 +47,5 @@ export function useCategories() {
     return { error };
   };
 
-  return { categories, loading, refetch: fetchCategories, createCategory, updateCategory, deleteCategory };
+  return { categories, loading, error, refetch: fetchCategories, createCategory, updateCategory, deleteCategory };
 }
