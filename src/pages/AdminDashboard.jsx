@@ -212,6 +212,7 @@ const ProductsManagement = () => {
   const [editingId, setEditingId] = useState(null);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', price: '', category_id: '', image_url: '', available: true });
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     const p = editingId ? products.find((x) => x.id === editingId) : null;
@@ -227,6 +228,7 @@ const ProductsManagement = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setSaveError('');
     const payload = {
       name: form.name,
       description: form.description,
@@ -235,14 +237,19 @@ const ProductsManagement = () => {
       image_url: form.image_url || null,
       is_available: form.available,
     };
-    if (editingId) {
-      await updateProduct(editingId, payload);
-      setEditingId(null);
-    } else {
-      await createProduct(payload);
+    try {
+      if (editingId) {
+        await updateProduct(editingId, payload);
+        setEditingId(null);
+      } else {
+        const { data, error } = await createProduct(payload);
+        if (error || !data) throw new Error(error?.message || 'Erro ao criar produto');
+      }
+      setOpen(false);
+      await refetch();
+    } catch (err) {
+      setSaveError(err.message || 'Erro ao salvar produto');
     }
-    setOpen(false);
-    await refetch();
   };
 
   const handleDelete = async (id) => {
@@ -307,12 +314,12 @@ const ProductsManagement = () => {
           <button onClick={() => { setEditingId(null); setOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-sm hover:shadow-md"><Plus className="w-4 h-4" /> Novo Produto</button>
         </div>
       </div>
-      {open && <ProductForm open={open} onClose={() => setOpen(false)} onSave={handleSave} form={form} setForm={setForm} editing={!!editingId} editingId={editingId} title={editingId ? 'Editar Produto' : 'Novo Produto'} />}
+      {open && <ProductForm open={open} onClose={() => setOpen(false)} onSave={handleSave} form={form} setForm={setForm} editing={!!editingId} editingId={editingId} saveError={saveError} setSaveError={setSaveError} title={editingId ? 'Editar Produto' : 'Novo Produto'} />}
     </div>
   );
 };
 
-const ProductForm = ({ open, onClose, onSave, form, setForm, editing, editingId, title }) => {
+const ProductForm = ({ open, onClose, onSave, form, setForm, editing, editingId, saveError, setSaveError, title }) => {
   const {
     optionCategories,
     loading: optionsLoading,
@@ -418,6 +425,11 @@ const ProductForm = ({ open, onClose, onSave, form, setForm, editing, editingId,
           <h3 className="font-bold text-gray-900">{title}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
         </div>
+        {saveError && (
+          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-100">
+            <p className="text-sm text-red-700">{saveError}</p>
+          </div>
+        )}
         <form onSubmit={onSave} className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Nome</label>

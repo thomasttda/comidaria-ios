@@ -10,7 +10,6 @@ export function useProducts() {
     const { data, error } = await supabase
       .from('products')
       .select(`, categories(name)`)
-      .eq('is_available', true)
       .order('created_at', { ascending: false });
 
     if (!error) {
@@ -28,9 +27,12 @@ export function useProducts() {
   }, []);
 
   const createProduct = async (product) => {
-    const { error } = await supabase.from('products').insert(product);
-    if (!error) await fetchProducts();
-    return { error };
+    const { data, error } = await supabase
+      .from('products')
+      .insert({ ...product, is_available: product.is_available !== false })
+      .select().single();
+    if (!error && data) await fetchProducts();
+    return { data, error };
   };
 
   const updateProduct = async (id, updates) => {
