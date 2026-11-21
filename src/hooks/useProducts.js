@@ -27,14 +27,10 @@ export function useProducts() {
   }, []);
 
   const createProduct = async (product) => {
-    const { data, error } = await supabase.rpc('fn_create_product', {
-      p_name: product.name,
-      p_description: product.description,
-      p_price: Number(product.price),
-      p_category_id: product.category_id || null,
-      p_image_url: product.image_url || null,
-      p_is_available: product.is_available !== false,
-    });
+    const { data, error } = await supabase
+      .from('products')
+      .insert({ ...product, is_available: product.is_available !== false })
+      .select().single();
     if (!error && data) await fetchProducts();
     return { data, error };
   };

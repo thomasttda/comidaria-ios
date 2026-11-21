@@ -281,7 +281,6 @@ const ProductsManagement = () => {
                 <th className="pb-3 text-xs font-semibold text-gray-400 uppercase">Produto</th>
                 <th className="pb-3 text-xs font-semibold text-gray-400 uppercase">Categoria</th>
                 <th className="pb-3 text-xs font-semibold text-gray-400 uppercase text-right">Preço</th>
-                <th className="pb-3 text-xs font-semibold text-gray-400 uppercase">Status</th>
                 <th className="pb-3 text-xs font-semibold text-gray-400 uppercase text-right">Ações</th>
               </tr>
             </thead>
@@ -296,11 +295,6 @@ const ProductsManagement = () => {
                   </td>
                   <td className="py-4 text-gray-600">{product.category || '—'}</td>
                   <td className="py-4 text-right font-medium text-gray-900">R$ {Number(product.price || 0).toFixed(2)}</td>
-                  <td className="py-4">
-                    <button onClick={() => handleToggle(product.id, product.available)} className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${product.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {product.available ? 'Ativo' : 'Inativo'}
-                    </button>
-                  </td>
                   <td className="py-4 text-right">
                     <button onClick={() => { setEditingId(product.id); setOpen(true); }} className="text-primary-600 hover:text-primary-700 mr-3"><Edit className="w-4 h-4" /></button>
                     <button onClick={() => handleDelete(product.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>
